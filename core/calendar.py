@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 import aiosqlite
+import calendar as pycal
 from config import DATABASE_PATH
 
 class Calendar:
@@ -76,6 +77,87 @@ class Calendar:
         async with aiosqlite.connect(self.db_path) as db:
             await db.execute("DELETE FROM events WHERE id = ?", (event_id,))
             await db.commit()
+
+    async def get_month_events(self, year: int, month: int) -> Dict[int, List[Dict]]:
+        """Get events for a specific month, grouped by day"""
+        async with aiosqlite.connect(self.db_path) as db:
+            db.row_factory = aiosqlite.Row
+            start_date = datetime(year, month, 1)
+
+            # Get last day of month
+            last_day = pycal.monthrange(year, month)[1]
+            end_date = datetime(year, month, last_day, 23, 59, 59)
+
+            cursor = await db.execute("""
+                SELECT id, title, description, event_date, reminder_minutes, completed
+                FROM events
+                WHERE event_date BETWEEN ? AND ?
+                ORDER BY event_date ASC
+            """, (start_date.isoformat(), end_date.isoformat()))
+            rows = await cursor.fetchall()
+
+            # Group by day
+            events_by_day = {}
+            for row in rows:
+                event = dict(row)
+                event_dt = datetime.fromisoformat(event['event_date'])
+                day = event_dt.day
+                if day not in events_by_day:
+                    events_by_day[day] = []
+                events_by_day[day].append(event)
+
+            return events_by_day
+
+    def render_month_calendar(self, year: int, month: int, events_by_day: Dict[int, List[Dict]]) -> str:
+        """Render an ASCII calendar for the month with events"""
+        cal = pycal.Calendar(firstweekday=6)  # Sunday first
+        month_name = pycal.month_name[month]
+
+        # Build calendar
+        lines = []
+        lines.append(f"╔{'═' * 62}╗")
+        lines.append(f"║ {month_name} {year}".ljust(63) + "║")
+        lines.append(f"╠{'═' * 62}╣")
+
+        # Day headers
+        lines.append("║ Sun    Mon    Tue    Wed    Thu    Fri    Sat          ║")
+        lines.append(f"╠{'═' * 62}╣")
+
+        # Get weeks
+        weeks = cal.monthdayscalendar(year, month)
+        today = datetime.now()
+
+        for week in weeks:
+            line = "║"
+            for day in week:
+                if day == 0:
+                    line += "       "
+                else:
+                    # Check if this is today
+                    is_today = (day == today.day and month == today.month and year == today.year)
+
+                    # Check if there are events
+                    has_events = day in events_by_day
+                    event_count = len(events_by_day.get(day, []))
+
+                    # Format day
+                    if is_today and has_events:
+                        line += f" [{day:2d}]*  "  # Today with events
+                    elif is_today:
+                        line += f" [{day:2d}]   "  # Today
+                    elif has_events:
+                        line += f"  {day:2d}*   "  # Has events
+                    else:
+                        line += f"  {day:2d}    "  # Regular day
+
+            line += " ║"
+            lines.append(line)
+
+        lines.append(f"╚{'═' * 62}╝")
+        lines.append("")
+        lines.append("Legend: [DD] = Today  | DD* = Has Events | [DD]* = Today + Events")
+
+        return "\n".join(lines)
 
 # Global calendar instance
 calendar = Calendar()

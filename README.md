@@ -7,6 +7,8 @@ A sophisticated AI assistant that combines Ollama LLMs with RAG (Retrieval-Augme
 - **🧠 RAG Pipeline**: FAISS vector search with BERT embeddings for intelligent context retrieval
 - **🔄 Dynamic Model Switching**: Hot-swap between different Ollama models
 - **🌐 Web Scraping**: Automatically scrape and index web content with BeautifulSoup
+- **🔌 MCP Integration**: Both MCP **Server** (be a tool for others) AND **Client** (use external tools)
+- **📅 Smart Calendar**: ASCII calendar view with natural language event creation
 - **🎨 Beautiful CLI**: Customizable themes (Matrix, Cyberpunk, Minimal) with Rich terminal UI
 - **💾 Persistent Memory**: Conversation history and document storage in SQLite
 - **⚡ Performance Optimized**: Lazy loading, caching, and async operations
@@ -67,6 +69,11 @@ jarvis❯ What is machine learning?
 | `/switch <model>` | Switch to different AI model |
 | `/scrape <url>` | Scrape website and add to knowledge base |
 | `/search <query>` | Search stored documents |
+| `/calendar` | Show upcoming events (7 days) |
+| `/month [month] [year]` | Show ASCII calendar for month |
+| `/today` | Show today's events |
+| `/mcp-servers` | List connected MCP servers |
+| `/mcp-tools [server]` | List MCP tools |
 | `/stats` | Show system statistics |
 | `/history` | Show conversation history |
 | `/theme <name>` | Change CLI theme |
@@ -112,6 +119,49 @@ Jarvis gets smarter over time:
 - **Document Growth**: More scraped content = better context
 - **Usage Patterns**: Optimizes based on your preferences
 
+## 🔌 MCP Client (Connect to External Tools)
+
+JRVS can now act as an **MCP Client**, connecting to MCP servers to access external tools like filesystems, databases, APIs, and more!
+
+### Quick Setup
+
+1. **Configure servers** in `mcp/client_config.json`:
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/xmanz"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    }
+  }
+}
+```
+
+2. **Start JRVS** - it will auto-connect to configured servers
+
+3. **Use MCP commands**:
+```bash
+/mcp-servers              # List connected servers
+/mcp-tools                # List all available tools
+/mcp-tools filesystem     # Tools from specific server
+```
+
+### Available MCP Servers
+
+- **filesystem** - File operations (read, write, search)
+- **github** - GitHub API (issues, PRs, repos)
+- **postgres** - PostgreSQL database access
+- **brave-search** - Web search
+- **memory** - Persistent notes/memory
+- **slack** - Slack messaging
+- And many more! See `MCP_CLIENT_GUIDE.md`
+
+📖 **Full guide**: See [MCP_CLIENT_GUIDE.md](MCP_CLIENT_GUIDE.md)
+
 ## 🛠️ Configuration
 
 ### Command Line Options
@@ -122,7 +172,7 @@ python main.py --help
 
 Options:
 - `--theme {matrix,cyberpunk,minimal}` - Set CLI theme
-- `--model MODEL_NAME` - Set default Ollama model  
+- `--model MODEL_NAME` - Set default Ollama model
 - `--ollama-url URL` - Custom Ollama API URL
 - `--no-banner` - Skip ASCII banner
 - `--debug` - Enable debug mode
@@ -130,7 +180,7 @@ Options:
 ### Themes
 
 - **Matrix**: Green-on-black hacker aesthetic
-- **Cyberpunk**: Magenta and cyan futuristic style  
+- **Cyberpunk**: Magenta and cyan futuristic style
 - **Minimal**: Clean black and white interface
 
 ## 📁 Project Structure
@@ -169,6 +219,22 @@ Edit `config.py` to customize:
 - Timeout settings  
 - RAG parameters
 - Performance limits
+
+### MCP (Model Context Protocol) Integration
+
+JRVS now includes a full-featured MCP server for Claude Code integration:
+
+```bash
+# Run MCP server
+python mcp/server.py
+
+# Test components
+python mcp/test_server.py
+```
+
+**17 tools available**: RAG search, web scraping, calendar, model switching, and more!
+
+See [MCP_SETUP.md](MCP_SETUP.md) for complete integration guide.
 
 ### API Integration
 

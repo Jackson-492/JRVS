@@ -72,6 +72,16 @@ class CommandHandler:
             elif command == "calendar":
                 await self.cli.show_calendar()
 
+            elif command == "month":
+                # /month or /month 11 2025
+                month = None
+                year = None
+                if len(command_args) >= 1:
+                    month = int(command_args[0])
+                if len(command_args) >= 2:
+                    year = int(command_args[1])
+                await self.cli.show_month_calendar(month, year)
+
             elif command == "event":
                 if len(command_args) >= 2:
                     await self.cli.add_event(command_args)
@@ -87,6 +97,29 @@ class CommandHandler:
                     await self.cli.complete_event(int(command_args[0]))
                 else:
                     theme.print_error("Usage: /complete <event_id>")
+
+            elif command == "mcp-servers":
+                await self.cli.list_mcp_servers()
+
+            elif command == "mcp-tools":
+                server = command_args[0] if command_args else None
+                await self.cli.list_mcp_tools(server)
+
+            elif command == "mcp-call":
+                if len(command_args) >= 3:
+                    server = command_args[0]
+                    tool = command_args[1]
+                    args_json = " ".join(command_args[2:])
+                    await self.cli.call_mcp_tool(server, tool, args_json)
+                else:
+                    theme.print_error("Usage: /mcp-call <server> <tool> <json_args>")
+                    theme.print_info("Example: /mcp-call filesystem read_file '{\"path\": \"/tmp/test.txt\"}'")
+
+            elif command == "report":
+                self.cli.show_agent_report()
+
+            elif command == "save-report":
+                self.cli.save_agent_report()
 
             elif command in ["exit", "quit", "bye"]:
                 if theme.confirm("Are you sure you want to exit?"):

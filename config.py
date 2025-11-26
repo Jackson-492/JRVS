@@ -17,12 +17,12 @@ VECTOR_INDEX_PATH = DATA_DIR / "faiss_index"
 
 # Ollama settings
 OLLAMA_BASE_URL = "http://localhost:11434"
-DEFAULT_MODEL = "gemma3:4b"
+DEFAULT_MODEL = "deepseek-r1:14b"
 
 # Timeout settings (in seconds)
 TIMEOUTS = {
-    "embedding_generation": 30,
-    "vector_search": 5,
+    "embedding_generation": 60,
+    "vector_search": 10,
     "context_building": 60,
     "ollama_response": 300,  # 5 minutes
     "web_scraping": 45
@@ -35,9 +35,9 @@ CHUNK_SIZE = 512
 CHUNK_OVERLAP = 50
 
 # Performance settings
-MAX_MEMORY_MB = 1024
-EMBEDDING_BATCH_SIZE = 32
-VECTOR_CACHE_SIZE = 1000
+MAX_MEMORY_MB = 2024
+EMBEDDING_BATCH_SIZE = 64
+VECTOR_CACHE_SIZE = 2000
 
 # CLI Theme settings
 THEMES = {
