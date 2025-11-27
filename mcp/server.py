@@ -3,7 +3,7 @@
 JRVS MCP Server - Model Context Protocol server for Jarvis AI Agent
 
 This server exposes JRVS capabilities (RAG, web scraping, calendar, Ollama models)
-as MCP tools that can be used by Claude Code and other MCP-compatible clients.
+as MCP tools that can be used by any MCP-compatible client.
 
 Usage:
     python mcp/server.py
@@ -34,6 +34,7 @@ from rag.retriever import rag_retriever
 from core.database import db
 from core.calendar import calendar
 from scraper.web_scraper import web_scraper
+from mcp.coding_agent import jarcore
 from config import OLLAMA_BASE_URL, DEFAULT_MODEL
 
 # Initialize MCP server
@@ -433,6 +434,222 @@ async def get_conversation_history(session_id: str, limit: int = 10) -> List[Dic
         }
         for conv in history
     ]
+
+
+# ============================================================================
+# JARCORE - JARVIS Autonomous Reasoning & Coding Engine
+# ============================================================================
+
+@mcp.tool()
+async def generate_code(
+    task: str,
+    language: str = "python",
+    context: Optional[str] = None,
+    include_tests: bool = False
+) -> Dict[str, Any]:
+    """
+    Generate code from natural language using JARCORE (JARVIS coding engine).
+
+    Args:
+        task: Natural language description of what the code should do
+        language: Programming language (python, javascript, go, rust, etc.)
+        context: Optional additional context or requirements
+        include_tests: Whether to generate test cases
+
+    Returns:
+        Generated code with explanation, dependencies, and usage example
+    """
+    return await jarcore.generate_code(task, language, context, include_tests)
+
+
+@mcp.tool()
+async def analyze_code(
+    code: str,
+    language: str = "python",
+    analysis_type: str = "comprehensive"
+) -> Dict[str, Any]:
+    """
+    Analyze code for bugs, security issues, performance, and best practices.
+
+    Args:
+        code: Code to analyze
+        language: Programming language
+        analysis_type: "comprehensive", "security", "performance", or "style"
+
+    Returns:
+        Analysis with issues, suggestions, and metrics
+    """
+    return await jarcore.analyze_code(code, language, analysis_type)
+
+
+@mcp.tool()
+async def refactor_code(
+    code: str,
+    language: str = "python",
+    refactor_goal: str = "improve readability and maintainability"
+) -> Dict[str, Any]:
+    """
+    Refactor code according to specified goals using AI.
+
+    Args:
+        code: Code to refactor
+        language: Programming language
+        refactor_goal: What to optimize for
+
+    Returns:
+        Refactored code with explanation of changes
+    """
+    return await jarcore.refactor_code(code, language, refactor_goal)
+
+
+@mcp.tool()
+async def explain_code(
+    code: str,
+    language: str = "python",
+    detail_level: str = "medium"
+) -> str:
+    """
+    Get natural language explanation of code.
+
+    Args:
+        code: Code to explain
+        language: Programming language
+        detail_level: "brief", "medium", or "detailed"
+
+    Returns:
+        Natural language explanation
+    """
+    return await jarcore.explain_code(code, language, detail_level)
+
+
+@mcp.tool()
+async def fix_code_errors(
+    code: str,
+    error_message: str,
+    language: str = "python"
+) -> Dict[str, Any]:
+    """
+    Automatically fix code based on error messages.
+
+    Args:
+        code: Code with errors
+        error_message: Error message from execution/linting
+        language: Programming language
+
+    Returns:
+        Fixed code with explanation
+    """
+    return await jarcore.fix_code_errors(code, error_message, language)
+
+
+@mcp.tool()
+async def read_code_file(file_path: str) -> Dict[str, Any]:
+    """
+    Read a code file with syntax detection and metadata.
+
+    Args:
+        file_path: Path to file (relative to JRVS workspace or absolute)
+
+    Returns:
+        File content, detected language, lines, size, and modification time
+    """
+    return await jarcore.read_file(file_path)
+
+
+@mcp.tool()
+async def write_code_file(
+    file_path: str,
+    content: str,
+    create_dirs: bool = True,
+    backup: bool = True
+) -> Dict[str, Any]:
+    """
+    Write code to a file with automatic backup.
+
+    Args:
+        file_path: Path to file
+        content: Code content to write
+        create_dirs: Create parent directories if needed
+        backup: Create backup of existing file
+
+    Returns:
+        Write operation result with path and statistics
+    """
+    return await jarcore.write_file(file_path, content, create_dirs, backup)
+
+
+@mcp.tool()
+async def execute_code(
+    code: str,
+    language: str = "python",
+    timeout: int = 30
+) -> Dict[str, Any]:
+    """
+    Execute code safely and return results.
+
+    Args:
+        code: Code to execute
+        language: Programming language (python, bash, javascript supported)
+        timeout: Execution timeout in seconds
+
+    Returns:
+        Execution results including output, errors, and exit code
+    """
+    return await jarcore.execute_code(code, language, timeout)
+
+
+@mcp.tool()
+async def generate_tests(
+    code: str,
+    language: str = "python",
+    test_framework: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Generate comprehensive unit tests for code.
+
+    Args:
+        code: Code to generate tests for
+        language: Programming language
+        test_framework: Specific test framework (pytest, jest, etc.)
+
+    Returns:
+        Generated test code with setup instructions
+    """
+    return await jarcore.generate_tests(code, language, test_framework)
+
+
+@mcp.tool()
+async def get_code_completion(
+    partial_code: str,
+    language: str = "python",
+    cursor_position: Optional[int] = None
+) -> List[str]:
+    """
+    Get intelligent code completion suggestions.
+
+    Args:
+        partial_code: Code written so far
+        language: Programming language
+        cursor_position: Position where completion is needed
+
+    Returns:
+        List of completion suggestions
+    """
+    return await jarcore.code_completion(partial_code, cursor_position, language)
+
+
+@mcp.tool()
+async def get_edit_history(limit: int = 10) -> List[Dict[str, Any]]:
+    """
+    Get recent code editing history from JARCORE.
+
+    Args:
+        limit: Maximum number of edits to return
+
+    Returns:
+        List of recent edit operations with timestamps
+    """
+    return jarcore.get_edit_history(limit)
 
 
 # ============================================================================
