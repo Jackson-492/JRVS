@@ -14,7 +14,7 @@ from typing import Optional, List, Dict
 from pathlib import Path
 import subprocess
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,6 +28,8 @@ from core.calendar import calendar
 from mcp.client import mcp_client
 from mcp.agent import mcp_agent
 from scraper.web_scraper import web_scraper
+from data_analysis.analyzer import data_analyzer
+from mcp.coding_agent import jarcore
 
 
 app = FastAPI(title="JRVS AI Agent", description="Intelligent AI assistant on your Tailscale network")
@@ -384,6 +386,14 @@ async def root():
     return HTMLResponse(content=html_content)
 
 
+@app.get("/data_analysis.html")
+async def data_analysis_page():
+    """Serve the data analysis UI"""
+    with open("static/data_modern.html", "r") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
+
+
 @app.get("/api/status")
 async def get_status():
     """Get JRVS status"""
@@ -419,18 +429,30 @@ async def get_month_calendar(year: Optional[int] = None, month: Optional[int] = 
 
 
 @app.post("/api/calendar/event")
-async def add_calendar_event(title: str, date: str, time: str, description: str = ""):
+async def add_calendar_event(
+    title: str = Form(...),
+    date: str = Form(...),
+    time: str = Form(...),
+    description: str = Form("")
+):
     """Add a calendar event"""
     from datetime import datetime as dt
 
-    event_dt = dt.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
-    event_id = await calendar.add_event(title, event_dt, description)
+    try:
+        event_dt = dt.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+        event_id = await calendar.add_event(title, event_dt, description)
 
-    return {
-        "success": True,
-        "event_id": event_id,
-        "message": f"Event '{title}' added for {event_dt.strftime('%Y-%m-%d %H:%M')}"
-    }
+        return {
+            "success": True,
+            "event_id": event_id,
+            "message": f"Event '{title}' added for {event_dt.strftime('%Y-%m-%d %H:%M')}"
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "message": f"Failed to add event: {e}"
+        }
 
 
 @app.get("/api/mcp/servers")
@@ -454,6 +476,89 @@ async def list_mcp_tools(server: Optional[str] = None):
     else:
         all_tools = await mcp_client.list_all_tools()
         return {"tools": all_tools}
+
+
+# ============================================================================
+# Data Analysis API Endpoints
+# ============================================================================
+
+@app.post("/api/data/upload/csv")
+async def upload_csv(file_path: str, name: Optional[str] = None):
+    """Upload and analyze CSV file"""
+    result = await data_analyzer.load_csv(file_path, name)
+    return result
+
+
+@app.post("/api/data/upload/excel")
+async def upload_excel(file_path: str, sheet_name: Optional[str] = None, name: Optional[str] = None):
+    """Upload and analyze Excel file"""
+    result = await data_analyzer.load_excel(file_path, sheet_name, name)
+    return result
+
+
+@app.get("/api/data/datasets")
+async def list_datasets():
+    """List all loaded datasets"""
+    return data_analyzer.list_datasets()
+
+
+@app.get("/api/data/dataset/{dataset_name}")
+async def get_dataset_info(dataset_name: str):
+    """Get information about a specific dataset"""
+    if dataset_name not in data_analyzer.loaded_datasets:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+
+    df = data_analyzer.loaded_datasets[dataset_name]
+    return {
+        "name": dataset_name,
+        "rows": len(df),
+        "columns": len(df.columns),
+        "preview": df.head(20).to_dict('records'),
+        "column_types": {col: str(dtype) for col, dtype in df.dtypes.items()}
+    }
+
+
+@app.post("/api/data/query")
+async def query_dataset(dataset_name: str, query: str):
+    """Execute query on dataset"""
+    result = await data_analyzer.query_data(dataset_name, query)
+    return result
+
+
+@app.get("/api/data/column/{dataset_name}/{column_name}")
+async def get_column_stats(dataset_name: str, column_name: str):
+    """Get statistics for a specific column"""
+    result = await data_analyzer.get_column_stats(dataset_name, column_name)
+    return result
+
+
+@app.post("/api/data/ai-insights/{dataset_name}")
+async def get_ai_insights(dataset_name: str):
+    """Get AI-powered insights about the dataset using JARCORE"""
+    result = await data_analyzer.get_ai_insights(dataset_name, jarcore)
+    return result
+
+
+# Jupyter Notebook endpoints
+
+@app.post("/api/notebook/create")
+async def create_notebook(name: str, title: str = "New Notebook"):
+    """Create a new Jupyter notebook"""
+    result = await data_analyzer.create_jupyter_notebook(name, title)
+    return result
+
+
+@app.post("/api/notebook/load")
+async def load_notebook(file_path: str):
+    """Load a Jupyter notebook"""
+    result = await data_analyzer.load_jupyter_notebook(file_path)
+    return result
+
+
+@app.get("/api/notebook/list")
+async def list_notebooks():
+    """List all loaded notebooks"""
+    return data_analyzer.list_notebooks()
 
 
 if __name__ == "__main__":
