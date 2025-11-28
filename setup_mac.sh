@@ -108,6 +108,11 @@ echo ""
 
 # Install Python dependencies
 echo "[5/7] Installing Python dependencies..."
+if [ ! -f "requirements.txt" ]; then
+    print_error "requirements.txt not found!"
+    print_info "Make sure you are running this script from the JRVS directory."
+    exit 1
+fi
 print_info "This may take a few minutes..."
 if pip3 install -r requirements.txt; then
     print_ok "Python dependencies installed successfully"
@@ -165,10 +170,14 @@ mkdir -p data
 print_ok "Data directory ready"
 echo ""
 
-# Make scripts executable
-chmod +x start_jrvs.sh 2>/dev/null || true
-chmod +x start-api.sh 2>/dev/null || true
-chmod +x setup_mac.sh 2>/dev/null || true
+# Make scripts executable (if they exist)
+print_info "Making scripts executable..."
+for script in start_jrvs.sh start-api.sh setup_mac.sh; do
+    if [ -f "$script" ]; then
+        chmod +x "$script"
+    fi
+done
+print_ok "Scripts configured"
 
 echo "========================================"
 echo "   Setup Complete!"

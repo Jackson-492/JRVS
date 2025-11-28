@@ -26,8 +26,8 @@ if %errorLevel% neq 0 (
     pause
     exit /b 1
 ) else (
-    for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
-    echo [OK] Python %PYTHON_VERSION% found
+    for /f "tokens=*" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION_STR=%%i
+    echo [OK] %PYTHON_VERSION_STR% found
 )
 echo.
 
@@ -52,13 +52,19 @@ if %errorLevel% neq 0 (
     echo [INFO] Please install Node.js from https://nodejs.org/
     echo.
 ) else (
-    for /f "tokens=1" %%i in ('node --version 2^>^&1') do set NODE_VERSION=%%i
+    for /f "tokens=*" %%i in ('node --version 2^>^&1') do set NODE_VERSION=%%i
     echo [OK] Node.js %NODE_VERSION% found
 )
 echo.
 
 REM Install Python dependencies
 echo [4/6] Installing Python dependencies...
+if not exist requirements.txt (
+    echo [ERROR] requirements.txt not found!
+    echo [INFO] Make sure you are running this script from the JRVS directory.
+    pause
+    exit /b 1
+)
 echo [INFO] This may take a few minutes...
 pip install -r requirements.txt
 if %errorLevel% neq 0 (
