@@ -106,8 +106,9 @@ class MCPConnection:
         if self.session:
             try:
                 await self.session.__aexit__(exc_type, exc_val, exc_tb)
-            except Exception:
+            except (Exception, asyncio.CancelledError):
                 # Ignore errors during cleanup to ensure stdio context is also cleaned up
+                # CancelledError can occur during shutdown when tasks are being cancelled
                 pass
             self.session = None
 
@@ -115,8 +116,9 @@ class MCPConnection:
         if self.stdio_ctx:
             try:
                 await self.stdio_ctx.__aexit__(exc_type, exc_val, exc_tb)
-            except Exception:
+            except (Exception, asyncio.CancelledError):
                 # Ignore errors during cleanup
+                # CancelledError can occur during shutdown when the cancel scope is cancelled
                 pass
             self.stdio_ctx = None
 
@@ -294,8 +296,13 @@ class MCPClient:
         if server_name in self.connections:
             connection = self.connections[server_name]
             # Exit the connection (this exits both session and stdio contexts)
-            await connection.__aexit__(None, None, None)
-            del self.connections[server_name]
+            # Note: exceptions are handled by cleanup() caller, but we still
+            # remove the connection to prevent it from being cleaned up again
+            try:
+                await connection.__aexit__(None, None, None)
+            finally:
+                # Always remove connection even if __aexit__ raised
+                del self.connections[server_name]
 
         if server_name in self.tools_cache:
             del self.tools_cache[server_name]
@@ -305,8 +312,11 @@ class MCPClient:
         for server_name in list(self.connections.keys()):
             try:
                 await self.disconnect_server(server_name)
-            except Exception as e:
-                print(f"Error disconnecting from {server_name}: {e}")
+            except (Exception, asyncio.CancelledError) as e:
+                # CancelledError can occur during shutdown when tasks are being cancelled
+                # This is expected and should be handled gracefully
+                if not isinstance(e, asyncio.CancelledError):
+                    print(f"Error disconnecting from {server_name}: {e}")
 
         self.initialized = False
 
