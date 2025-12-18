@@ -68,10 +68,10 @@ CLI and API interfaces
 Web scraping and indexing support
 Tradeoffs (Explicit by Design)
 JRVS makes the following tradeoffs deliberately:
-✔ Simplicity over horizontal scalability
-✔ Local control over hosted convenience
-✔ Explicit configuration over hidden automation
-✔ Extensibility over monolithic design
+Simplicity over horizontal scalability
+Local control over hosted convenience
+Explicit configuration over hidden automation
+Extensibility over monolithic design
 These choices reflect the environments JRVS is designed for.
 Who Should Use JRVS
 JRVS is a good fit if you:
