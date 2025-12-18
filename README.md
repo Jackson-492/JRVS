@@ -1,31 +1,99 @@
-# Jarvis AI Agent 🤖
+JRVS
+JRVS is a local-first AI agent framework designed for developers who want control, extensibility, and predictable behavior when working with local language models and tools.
+JRVS prioritizes clear architectural boundaries, low operational overhead, and explicit tradeoffs over opaque abstraction or cloud dependency.
+Why JRVS Exists
+Most AI agent frameworks optimize for:
+Hosted models
+Rapid experimentation
+Maximum abstraction
+JRVS is optimized for a different set of constraints:
+Local inference (CPU/GPU, quantized models, limited memory)
+Offline or privacy-sensitive workflows
+Explicit control over tools, memory, and retrieval
+Extensibility without tight coupling
+The result is a system that may overlap in capabilities with other tools, but differs fundamentally in design goals and execution model.
+Design Principles
+JRVS is built around a few intentional principles:
+1. Local-First by Default
+JRVS assumes models run locally (e.g. via Ollama or similar runtimes).
+This forces explicit handling of:
+Memory constraints
+Latency tradeoffs
+Hardware variability
+Cloud-hosted APIs are not the primary target.
+2. Explicit Architecture Over Magic
+Core subsystems are clearly separated:
+Agent core
+Retrieval-augmented generation (RAG)
+Persistent memory
+Tool and protocol layer
+CLI and API interfaces
+This makes behavior predictable, debuggable, and extensible.
+3. Protocol-Based Tooling
+JRVS uses tool protocols (MCP / UTCP) instead of hard-coded integrations.
+This allows:
+Tools to be added without modifying the core agent
+Loose coupling between execution and capability
+Safer extension by third parties
+4. Practical Persistence
+JRVS uses SQLite and FAISS for memory and retrieval.
+This choice favors:
+Simplicity
+Local reliability
+Zero-ops setup
+The tradeoff is reduced horizontal scalability, which is an intentional non-goal for a local-first system.
+5. Designed for Builders, Not Demos
+JRVS exposes:
+A CLI for direct use
+An API for integration
+Configuration surfaces instead of hidden defaults
+Once a system has users, behavior must be explicit. JRVS treats that as a requirement, not an afterthought.
+What JRVS Is (and Isn’t)
+JRVS is:
+A framework for building local AI agents
+A developer tool, not a hosted service
+Opinionated about constraints, flexible about extension
+JRVS is not:
+A cloud-scale, multi-tenant agent platform
+A no-code or consumer AI product
+A replacement for every agent framework
+If you need distributed orchestration or SaaS-style scaling, a different architecture is more appropriate.
+Core Features
+Local LLM integration (e.g. Ollama)
+Retrieval-Augmented Generation (FAISS + embeddings)
+Persistent memory (SQLite)
+Protocol-based tool calling (MCP / UTCP)
+Modular architecture
+CLI and API interfaces
+Web scraping and indexing support
+Tradeoffs (Explicit by Design)
+JRVS makes the following tradeoffs deliberately:
+✔ Simplicity over horizontal scalability
+✔ Local control over hosted convenience
+✔ Explicit configuration over hidden automation
+✔ Extensibility over monolithic design
+These choices reflect the environments JRVS is designed for.
+Who Should Use JRVS
+JRVS is a good fit if you:
+Run models locally
+Care about privacy or offline workflows
+Want to understand and extend the system
+Prefer clear architecture over opaque abstraction
+JRVS is likely not a good fit if you:
+Need managed cloud infrastructure
+Want zero configuration
+Are optimizing for multi-tenant scale
+Project Status
+JRVS is actively developed and used by developers experimenting with and building local AI workflows.
+Breaking changes are avoided where possible, but architectural clarity takes priority over strict backward compatibility at this stage.
+Contributing
+Contributions are welcome, especially around:
+Tool protocol extensions
+Performance improvements
+Documentation and design feedback
+Please open an issue before large changes to align on direction.
 
-A sophisticated AI Interface that combines Local or API LLM responses with RAG (Retrieval-Augmented Generation) capabilities, featuring web scraping, vector search, and intelligent context injection.
-A privacy-first, local-friendly AI agent with built-in RAG and protocol tool support optimized for developers and builders
-## 🏢 Enterprise & Hosted Solutions
-
-**Need AI tools but can't use ChatGPT due to compliance?**
-JRVS provides enterprise-ready AI infrastructure that keeps your data private.
-
-→ [Learn about Enterprise & Hosted options](./ENTERPRISE.md)
-
----
-
-## ✨ Features
-
-- **🧠 RAG Pipeline**: FAISS vector search with BERT embeddings for intelligent context retrieval
-- **🔄 Dynamic Model Switching**: Hot-swap between different Ollama models
-- **🌐 Web Scraping**: Automatically scrape and index web content with BeautifulSoup
-- **🔌 MCP Integration**: Both MCP **Server** (be a tool for others) AND **Client** (use external tools)
-- **🌍 UTCP Support**: Universal Tool Calling Protocol for direct AI agent tool access
-- **📅 Smart Calendar**: ASCII calendar view with natural language event creation
-- **🎨 Beautiful CLI**: Customizable themes (Matrix, Cyberpunk, Minimal) with Rich terminal UI
-- **💾 Persistent Memory**: Conversation history and document storage in SQLite
-- **⚡ Performance Optimized**: Lazy loading, caching, and async operations
-- **🛡️ Robust**: Timeout handling, circuit breakers, and graceful error recovery
-- **📊 Smart Analytics**: Usage statistics and system health monitoring
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -81,7 +149,7 @@ python main.py
 
 ---
 
-## 🖥️ Platform-Specific Setup
+## Platform-Specific Setup
 
 ### Windows Setup
 
@@ -198,7 +266,7 @@ python3 main.py
 
 ---
 
-## 📋 Dependency Reference
+## Dependency Reference
 
 ### Python Dependencies
 
@@ -224,7 +292,7 @@ python3 main.py
 
 ---
 
-## 🎯 Usage
+## Usage
 
 ### Basic Chat
 Just type your questions and Jarvis will respond with enhanced context from its knowledge base:
@@ -275,7 +343,7 @@ jarvis❯ /search python best practices
 jarvis❯ /theme cyberpunk
 ```
 
-## 🧬 How It Works
+## How It Works
 
 ### RAG (Retrieval-Augmented Generation) Pipeline
 
@@ -292,7 +360,7 @@ Jarvis gets smarter over time:
 - **Document Growth**: More scraped content = better context
 - **Usage Patterns**: Optimizes based on your preferences
 
-## 🔌 MCP Client (Connect to External Tools)
+## MCP Client (Connect to External Tools)
 
 JRVS can now act as an **MCP Client**, connecting to MCP servers to access external tools like filesystems, databases, APIs, and more!
 
@@ -333,9 +401,9 @@ JRVS can now act as an **MCP Client**, connecting to MCP servers to access exter
 - **slack** - Slack messaging
 - And many more! See `MCP_CLIENT_GUIDE.md`
 
-📖 **Full guide**: See [MCP_CLIENT_GUIDE.md](MCP_CLIENT_GUIDE.md)
+ **Full guide**: See [MCP_CLIENT_GUIDE.md](MCP_CLIENT_GUIDE.md)
 
-## 🌍 UTCP Support (Universal Tool Calling Protocol)
+## UTCP Support (Universal Tool Calling Protocol)
 
 JRVS now supports **UTCP** - a modern, lightweight protocol that allows AI agents to discover and call tools directly without wrapper servers.
 
@@ -371,11 +439,11 @@ curl -X POST http://localhost:8000/api/chat \
 | **Infrastructure** | None required | Servers needed |
 | **Best for** | REST APIs | Stdio tools, complex workflows |
 
-📖 **Full guide**: See [docs/UTCP_GUIDE.md](docs/UTCP_GUIDE.md)
+ **Full guide**: See [docs/UTCP_GUIDE.md](docs/UTCP_GUIDE.md)
 
-🔗 **Learn more**: [UTCP Specification](https://github.com/universal-tool-calling-protocol)
+**Learn more**: [UTCP Specification](https://github.com/universal-tool-calling-protocol)
 
-## 🛠️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -419,7 +487,7 @@ Options:
 - **Cyberpunk**: Magenta and cyan futuristic style
 - **Minimal**: Clean black and white interface
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 jarvis_ai_agent/
@@ -447,7 +515,7 @@ jarvis_ai_agent/
     └── faiss_index.*    # Vector index files
 ```
 
-## 🔧 Advanced Usage
+## Advanced Usage
 
 ### Custom Model Configuration
 
@@ -501,7 +569,7 @@ context = await rag_retriever.retrieve_context(query)
 response = await lmstudio_client.generate(query, context=context)
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -622,7 +690,7 @@ pip install -r requirements.txt
 
 To deactivate: `deactivate`
 
-## 🤝 Contributing
+## Contributing
 
 This is a functional RAG system built for learning and experimentation. Feel free to:
 - Add new features
@@ -631,11 +699,11 @@ This is a functional RAG system built for learning and experimentation. Feel fre
 - Add new themes
 - Enhance the CLI
 
-## ⚖️ License
+## License
 
 This project is for educational and personal use. Respect website terms of service when scraping.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **Ollama** for local LLM serving
 - **FAISS** for efficient vector search
@@ -643,6 +711,3 @@ This project is for educational and personal use. Respect website terms of servi
 - **Rich** for beautiful terminal UI
 - **BeautifulSoup** for web scraping
 
----
-
-**Happy chatting with Jarvis! 🚀**
